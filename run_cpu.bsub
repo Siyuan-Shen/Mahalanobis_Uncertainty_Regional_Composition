@@ -1,0 +1,27 @@
+#!/bin/bash
+#BSUB -q rvmartin
+#BSUB -n 2
+#BSUB -W 168:00
+#BSUB -G compute-rvmartin
+#BSUB -R "rusage[mem=150GB] span[hosts=1] select[port8543=1 && hname!='compute1-exec-311.ris.wustl.edu' && hname!='compute1-exec-23.ris.wustl.edu'] "
+#BSUB -a 'docker(syword/python3-pytorch:2024.11)'
+#BSUB -J "derive_resampled_trainingdata_BLISCO_data"
+#BSUB -N
+#BSUB -G compute-rvmartin
+#BSUB -g /s.siyuan/CV
+#BSUB -u s.siyuan@wustl.edu
+#BSUB -o job_output/job-%J-output.txt
+
+# Set up runtime environment
+
+. /opt/conda/bin/activate
+
+# Run my python codes   
+
+
+cd /my-projects/Projects/PM25_Speices_DL_2023/code/Manuscript_Figures/Mahalanobis_distance_uncertainty_calculation_plot/  # cd into run directory
+
+# python3 derive_resampled_trainingdata_BLISCO_data.py
+python3 calculate_the_mahalanobis_distance_binned_rRMSE.py --SPECIES_list 'SS'
+# python3 derive_map_mahalanobis_uncertainty.py  --SPECIES_list 'PM25' --desire_year_list 2002
+
