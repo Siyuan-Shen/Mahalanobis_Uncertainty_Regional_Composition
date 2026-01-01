@@ -56,16 +56,16 @@ def Plot_Map_estimation_Map_Figures(species,map_estimation_map:np.array,Mahalano
     #ax.text(extent[2], extent[1]-0.1*abs(extent[1]), '$R^2 = $' + str(R2), style='italic', fontsize=12)
     #ax.text(extent[2], extent[1], '$RMSE = $' + str(RMSE), style='italic', fontsize=12)
     SPEC_NAME = title_name[species]
-    ax.text(extent[0]+0.01*abs(extent[1]-extent[0]),extent[2]+0.10*abs(extent[3]-extent[2]),'{} {}-{}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 11)
+    ax.text(extent[1]+0.01*abs(extent[1]-extent[0]),extent[2]+0.05*abs(extent[3]-extent[2]),'{} {} {}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 10)
 
     # Global colorbar parameters fraction=0.35, pad=-1.63, shrink=0.5, aspect=50.0
-    cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
-    ticks = np.linspace(vmin, vmax, 5)
-    cbar.set_ticks(ticks)
-    cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
-    cbar.ax.tick_params(labelsize=12)
-    cbar.set_label('{}'.format(title_name[species]) + '' + r'$\rm{(\mu g/m^3)}$')
-    cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
+    #cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
+    #ticks = np.linspace(vmin, vmax, 5)
+    #cbar.set_ticks(ticks)
+    #cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
+    #cbar.ax.tick_params(labelsize=12)
+    #cbar.set_label('{}'.format(title_name[species]) + '' + r'$\rm{(\mu g/m^3)}$')
+    #cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
     #gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=0.4, color='k', alpha=0.7, linestyle='--')
     ##gl.top_labels = False  ##关闭上侧坐标显示
     #gl.right_labels = False  ##关闭右侧坐标显示
@@ -75,6 +75,13 @@ def Plot_Map_estimation_Map_Figures(species,map_estimation_map:np.array,Mahalano
     #gl.ylocator = mticker.FixedLocator(np.arange(extent[2], extent[3], 10))
     #gl.xlabel_style = {'size': 3.5}
     #gl.ylabel_style = {'size': 3.5}
+
+    cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label('{}'.format(title_name[species]) + ' ' + r'$\rm{(\mu g/m^3)}$',size=8)
+    #cbar.set_label('PM$_{2.5}$' + '' + r'$\rm{(\mu g/m^3)}$')
+    cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
+    
     plt.savefig(outfile, format = 'png', dpi= 500, transparent = True,bbox_inches='tight')
     plt.close()
 
@@ -117,16 +124,13 @@ def Plot_absolute_Uncertainty_Map_Figures(species,absolute_uncertainty_map:np.ar
     #ax.text(extent[2], extent[1]-0.1*abs(extent[1]), '$R^2 = $' + str(R2), style='italic', fontsize=12)
     #ax.text(extent[2], extent[1], '$RMSE = $' + str(RMSE), style='italic', fontsize=12)
     SPEC_NAME = title_name[species]
-    ax.text(extent[0]+0.01*abs(extent[1]-extent[0]),extent[2]+0.10*abs(extent[3]-extent[2]),'{} {}-{}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 11)
-
-    # Global colorbar parameters fraction=0.35, pad=-1.63, shrink=0.5, aspect=50.0
+    ax.text(extent[1]+0.01*abs(extent[1]-extent[0]),extent[2]+0.05*abs(extent[3]-extent[2]),'{} {} {}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 10,fontweight='bold')
     cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
-    ticks = np.linspace(vmin, vmax, 5)
-    cbar.set_ticks(ticks)
-    cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
-    cbar.ax.tick_params(labelsize=12)
-    cbar.set_label('Uncertainties' + '' + r'$\rm{(\mu g/m^3)}$')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label('Uncertainties' + '' + r'$\rm{(\mu g/m^3)}$',size=8)
+    #cbar.set_label('PM$_{2.5}$' + '' + r'$\rm{(\mu g/m^3)}$')
     cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
+    
     #gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=0.4, color='k', alpha=0.7, linestyle='--')
     ##gl.top_labels = False  ##关闭上侧坐标显示
     #gl.right_labels = False  ##关闭右侧坐标显示
@@ -179,15 +183,11 @@ def Plot_rRMSE_Uncertainty_Map_Figures(species,rRMSE_uncertainty_map:np.array,Ma
     #ax.text(extent[2], extent[1]-0.1*abs(extent[1]), '$R^2 = $' + str(R2), style='italic', fontsize=12)
     #ax.text(extent[2], extent[1], '$RMSE = $' + str(RMSE), style='italic', fontsize=12)
     SPEC_NAME = title_name[species]
-    ax.text(extent[0]+0.01*abs(extent[1]-extent[0]),extent[2]+0.10*abs(extent[3]-extent[2]),'{} {}-{}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 11)
-
-    # Global colorbar parameters fraction=0.35, pad=-1.63, shrink=0.5, aspect=50.0
+    ax.text(extent[1]+0.01*abs(extent[1]-extent[0]),extent[2]+0.05*abs(extent[3]-extent[2]),'{} {} {}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 10,fontweight='bold')
     cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
-    ticks = np.linspace(vmin, vmax, 5)
-    cbar.set_ticks(ticks)
-    cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
-    cbar.ax.tick_params(labelsize=12)
-    cbar.set_label('Uncertainties' + '' + r'$\rm{(unitless)}$')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label('Uncertainties' + '' + r'$\rm{(unitless)}$',size=8)
+    #cbar.set_label('PM$_{2.5}$' + '' + r'$\rm{(\mu g/m^3)}$')
     cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
     #gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=0.4, color='k', alpha=0.7, linestyle='--')
     ##gl.top_labels = False  ##关闭上侧坐标显示
@@ -243,22 +243,14 @@ def Plot_Mahalanobis_distance_Map_Figures(species,mahalanobis_distance_map:np.ar
     #ax.text(extent[2], extent[1], '$RMSE = $' + str(RMSE), style='italic', fontsize=12)
     
     SPEC_NAME = title_name[species]
-    ax.text(extent[0]+0.01*abs(extent[1]-extent[0]),extent[2]+0.10*abs(extent[3]-extent[2]),'{} {}-{}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 11)
-
     # Global colorbar parameters fraction=0.35, pad=-1.63, shrink=0.5, aspect=50.0
+    ax.text(extent[1]+0.01*abs(extent[1]-extent[0]),extent[2]+0.05*abs(extent[3]-extent[2]),'{} {} {}'.format(SPEC_NAME,YYYY,MM), style='italic',fontsize = 10,fontweight='bold')
     cbar = plt.colorbar(pcm, location = 'right', fraction=0.15, shrink=0.35, aspect=40.0, anchor=(-5.7,0.5), orientation='vertical', extend='both')
-    cbar.ax.tick_params(labelsize=12)
-    cbar.set_label('Mahalanobis Distances')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label('Mahalanobis Dist',size=12)
+    #cbar.set_label('PM$_{2.5}$' + '' + r'$\rm{(\mu g/m^3)}$')
     cbar.ax.xaxis.set_major_formatter(tick.FormatStrFormatter('%.2f'))
-    #gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, linewidth=0.4, color='k', alpha=0.7, linestyle='--')
-    ##gl.top_labels = False  ##关闭上侧坐标显示
-    #gl.right_labels = False  ##关闭右侧坐标显示
-    #gl.xformatter = LONGITUDE_FORMATTER  ##坐标刻度转换为经纬度样式
-    #gl.yformatter = LATITUDE_FORMATTER
-    #gl.xlocator = mticker.FixedLocator(np.arange(extent[0], extent[1], 10))
-    #gl.ylocator = mticker.FixedLocator(np.arange(extent[2], extent[3], 10))
-    #gl.xlabel_style = {'size': 3.5}
-    #gl.ylabel_style = {'size': 3.5}
+    
     plt.savefig(outfile, format = 'png', dpi= 500, transparent = True,bbox_inches='tight')
     plt.close()
 

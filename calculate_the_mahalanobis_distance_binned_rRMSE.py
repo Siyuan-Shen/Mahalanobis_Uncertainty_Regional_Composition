@@ -29,16 +29,16 @@ if 'PM25' in SPECIES_list:
     BLCO_kfold = 10
     BLCO_seeds_number = 10
     channel_lists = [
-                    'AOD', 'GeoPM25','ETA',# 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias', 'EtaSGTOPO_Bias',
-                    'GC_NH4', #'GC_SO4',  'GC_SOA',  'GC_BC', 'GC_DST','GC_SSLT',
-                    #'NH3_anthro_emi','NO_anthro_emi', 'OC_anthro_emi', 'BC_anthro_emi',
-                   # 'DST_offline_emi',
-                    'RH', #'T2M', 'U10M', 'V10M','PRECTOT','PBLH', 
-                    #'Urban_Builtup_Lands',
+                    'AOD', 'GeoPM25','ETA', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias', 'EtaSGTOPO_Bias',
+                    'GC_NH4', 'GC_SO4',  'GC_SOA',  'GC_BC', 'GC_DST','GC_SSLT',
+                    'NH3_anthro_emi','NO_anthro_emi', 'OC_anthro_emi', 'BC_anthro_emi',
+                    'DST_offline_emi',
+                    'RH', 'T2M', 'U10M', 'V10M','PRECTOT','PBLH', 
+                    'Urban_Builtup_Lands',
                     'minor_roads',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',# 'elevation',
-                   # 'Population'
+                    'Month_of_Year',
+                    'Lat', 'Lon', 'elevation',
+                    'Population'
                     ]
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
@@ -74,17 +74,17 @@ if 'NO3' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [#'AOD','ETA', 'GeoPM25','EtaAOD_Bias', 'EtaMixing', 'EtaSGAOD_Bias', 
-                    'GeoNIT','GeoBC','GeoNH4','GeoSO4',#'GeoOM','GeoDUST','GeoSS',
-                    #'NA_CNN_PM25',
-                    'GC_NIT',  'GC_SO4', 'GC_SOA',# 'GC_PM25', 'GC_BC', 'GC_NH4', 'GC_DST','GC_SSLT','GC_OM',
-                    'NH3_anthro_emi',#'NO_anthro_emi', 'OC_anthro_emi', 'SO2_anthro_emi',
-                   # 'DST_offline_emi','SSLT_offline_emi',
-                   # 'RH', 'T2M', 'U10M', 'V10M','PBLH', 'PRECTOT',
-                   # 'Urban_Builtup_Lands','Croplands',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',#'elevation',
-                    #'Population'
+    channel_lists = ['AOD','ETA', 'GeoPM25','EtaAOD_Bias', 'EtaMixing', 'EtaSGAOD_Bias', 
+                    'GeoNIT','GeoBC','GeoNH4','GeoSO4','GeoOM','GeoDUST','GeoSS',
+                    'NA_CNN_PM25',
+                    'GC_NIT',  'GC_SO4', 'GC_SOA', 'GC_PM25', 'GC_BC', 'GC_NH4', 'GC_DST','GC_SSLT','GC_OM',
+                    'NH3_anthro_emi','NO_anthro_emi', 'OC_anthro_emi', 'SO2_anthro_emi',
+                    'DST_offline_emi','SSLT_offline_emi',
+                    'RH', 'T2M', 'U10M', 'V10M','PBLH', 'PRECTOT',
+                    'Urban_Builtup_Lands','Croplands',
+                    'Month_of_Year',
+                    'Lat', 'Lon','elevation',
+                    'Population'
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
@@ -118,16 +118,16 @@ if 'SO4' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [#'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
-                    'GeoSO4',#'GeoNH4','GeoNIT','GeoBC','GeoOM','GeoDUST','GeoSS',
+    channel_lists = ['AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
+                    'GeoSO4','GeoNH4','GeoNIT','GeoBC','GeoOM','GeoDUST','GeoSS',
                     'NA_CNN_PM25',
-                    'GC_NH4', 'GC_SO4',  'GC_SOA',  'GC_DST',#'GC_PM25', 'GC_BC','GC_OM','GC_SSLT',#'GC_NIT', #'GC_OC',
-                    #'NH3_anthro_emi','NO_anthro_emi','SO2_anthro_emi',
-                     #'SSLT_offline_emi',
-                    'T2M', #'RH', 'U10M', 'V10M','PBLH', 'PRECTOT',
-                    #'Urban_Builtup_Lands',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',#'elevation',
+                    'GC_NH4', 'GC_SO4',  'GC_SOA',  'GC_DST','GC_PM25', 'GC_BC','GC_OM','GC_SSLT',#'GC_NIT', #'GC_OC',
+                    'NH3_anthro_emi','NO_anthro_emi','SO2_anthro_emi',
+                    'SSLT_offline_emi',
+                    'T2M', 'RH', 'U10M', 'V10M','PBLH', 'PRECTOT',
+                    'Urban_Builtup_Lands',
+                    'Month_of_Year',
+                    'Lat', 'Lon','elevation',
                    
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
@@ -162,16 +162,16 @@ if 'NH4' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [ #'AOD','EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias', 'EtaSGTOPO_Bias','GeoPM25','ETA',
-                    'GeoNH4','GeoSO4',#'GeoBC','GeoOM','GeoDUST','GeoNIT',
+    channel_lists = [ 'AOD','EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias', 'EtaSGTOPO_Bias','GeoPM25','ETA',
+                    'GeoNH4','GeoSO4','GeoBC','GeoOM','GeoDUST','GeoNIT',
                     'NA_CNN_PM25',
-                     'GC_SO4', 'GC_SOA',  'GC_BC',#'GC_PM25', 'GC_NH4', 'GC_DST','GC_SSLT','GC_OM',
-                     #'SSLT_offline_emi',
-                    'T2M',# 'U10M', 'V10M','PBLH', 'PRECTOT',
-                    #'Urban_Builtup_Lands','Croplands','Crop_Nat_Vege_Mos','Permanent_Wetlands',
+                     'GC_SO4', 'GC_SOA',  'GC_BC','GC_PM25', 'GC_NH4', 'GC_DST','GC_SSLT','GC_OM',
+                     'SSLT_offline_emi',
+                    'T2M', 'U10M', 'V10M','PBLH', 'PRECTOT',
+                    'Urban_Builtup_Lands','Croplands','Crop_Nat_Vege_Mos','Permanent_Wetlands',
                     'Month_of_Year',
-                    'Lat', 'Lon',#'elevation',
-                    #'Population'
+                    'Lat', 'Lon','elevation',
+                    'Population'
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
@@ -205,17 +205,17 @@ if 'BC' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [#'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
-                    'GeoBC','GeoSO4',#'GeoNH4','GeoNIT','GeoOM','GeoSS',
+    channel_lists = ['AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
+                    'GeoBC','GeoSO4','GeoNH4','GeoNIT','GeoOM','GeoSS',
                     'NA_CNN_PM25',
-                    'GC_SOA', 'GC_SO4',  'GC_BC',# 'GC_PM25', 'GC_NH4',  'GC_DST','GC_SSLT','GC_NIT',# #'GC_OC','GC_OM','
+                    'GC_SOA', 'GC_SO4',  'GC_BC', 'GC_PM25', 'GC_NH4',  'GC_DST','GC_SSLT','GC_NIT',# #'GC_OC','GC_OM','
                     'BC_anthro_emi','OC_anthro_emi',
-                    #'T2M', 'U10M', 'V10M','PBLH', 'RH', 'PRECTOT',
+                    'T2M', 'U10M', 'V10M','PBLH', 'RH', 'PRECTOT',
                     'Urban_Builtup_Lands',
-                    #'log_motorway','log_primary',
-                    #'major_roads',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',#'elevation'
+                    'log_motorway','log_primary',
+                    'major_roads',
+                    'Month_of_Year',
+                    'Lat', 'Lon','elevation'
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
@@ -249,16 +249,16 @@ if 'OM' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [ #'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA',
-                    'GeoOM','GeoSO4',#'GeoNIT','GeoSS',
+    channel_lists = [ 'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA',
+                    'GeoOM','GeoSO4','GeoNIT','GeoSS',
                     'NA_CNN_PM25',
-                    'GC_SOA', #'GC_OM', 'GC_PM25',  'GC_BC', 'GC_NIT', 
-                    'SO2_anthro_emi','NO_anthro_emi', 'OC_anthro_emi',#'NH3_anthro_emi','NMVOC_anthro_emi', 
-                    #'DST_offline_emi',
-                    #'RH', 'T2M', 'U10M', 'V10M','PBLH', 'PRECTOT',
+                    'GC_SOA', 'GC_OM', 'GC_PM25',  'GC_BC', 'GC_NIT', 
+                    'SO2_anthro_emi','NO_anthro_emi', 'OC_anthro_emi','NH3_anthro_emi','NMVOC_anthro_emi', 
+                    'DST_offline_emi',
+                    'RH', 'T2M', 'U10M', 'V10M','PBLH', 'PRECTOT',
                     'Urban_Builtup_Lands',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',#'elevation',
+                    'Month_of_Year',
+                    'Lat', 'Lon','elevation',
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
@@ -293,18 +293,18 @@ if 'DUST' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [#'AOD',  'EtaSGAOD_Bias',
-                'GeoBC','GeoDUST',#'GeoNH4','GeoNIT','GeoSO4','GeoSS',
+    channel_lists = ['AOD',  'EtaSGAOD_Bias',
+                'GeoBC','GeoDUST','GeoNH4','GeoNIT','GeoSO4','GeoSS',
                 'NA_CNN_PM25',
-                'GC_SOA','GC_DST',# 'GC_NH4', 'GC_NIT','GC_SO4','GC_PM25',    'GC_BC', 'GC_SSLT','GC_OM',# #'GC_OC',
-                'OC_anthro_emi', #'SO2_anthro_emi',
-                #'SSLT_offline_emi',
-                'RH', #'T2M', 'PBLH','USTAR', 'PRECTOT',
-               # 'Urban_Builtup_Lands',
-               # 'unclassified',
+                'GC_SOA','GC_DST', 'GC_NH4', 'GC_NIT','GC_SO4','GC_PM25',    'GC_BC', 'GC_SSLT','GC_OM',# #'GC_OC',
+                'OC_anthro_emi', 'SO2_anthro_emi',
+                'SSLT_offline_emi',
+                'RH', 'T2M', 'PBLH','USTAR', 'PRECTOT',
+                'Urban_Builtup_Lands',
+                'unclassified',
                 'Month_of_Year',
-                'Lat', 'Lon',#'elevation',
-                #'Population'
+                'Lat', 'Lon','elevation',
+                'Population'
                 ] 
 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
@@ -339,15 +339,15 @@ if 'SS' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
-    channel_lists = [ #'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
-                    'GeoSS','GeoSO4',#'GeoBC','GeoNH4','GeoNIT','GeoOM','GeoDUST',
-                    #'NA_CNN_PM25',
-                    'GC_SO4',#'GC_PM25', 'GC_NH4',   'GC_SOA',  'GC_BC', 'GC_DST','GC_SSLT','GC_OM','GC_NIT', #'GC_OC',
-                    'SO2_anthro_emi','OC_anthro_emi', 'BC_anthro_emi',#'NH3_anthro_emi','NO_anthro_emi', 'NMVOC_anthro_emi',####'N2O_anthro_emi',,# 
-                    #'DST_offline_emi',
-                    'T2M','PBLH', #'RH', 'U10M', 'V10M','PRECTOT',
-                    #'Month_of_Year',
-                    'Lat', 'Lon',#'elevation',
+    channel_lists = [ 'AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
+                    'GeoSS','GeoSO4','GeoBC','GeoNH4','GeoNIT','GeoOM','GeoDUST',
+                    'NA_CNN_PM25',
+                    'GC_SO4','GC_PM25', 'GC_NH4',   'GC_SOA',  'GC_BC', 'GC_DST','GC_SSLT','GC_OM','GC_NIT', #'GC_OC',
+                    'SO2_anthro_emi','OC_anthro_emi', 'BC_anthro_emi','NH3_anthro_emi','NO_anthro_emi', 'NMVOC_anthro_emi',####'N2O_anthro_emi',,# 
+                    'DST_offline_emi',
+                    'T2M','PBLH', 'RH', 'U10M', 'V10M','PRECTOT',
+                    'Month_of_Year',
+                    'Lat', 'Lon','elevation',
                     ] 
     desire_year_list = ['2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
                         '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',

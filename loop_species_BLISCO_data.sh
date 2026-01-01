@@ -2,7 +2,7 @@
 
 # Define the tracers and years
 # tracers=("PM25" "NO3" "SO4" "NH4" "BC" "OM" "DUST" "SS")
-tracers=("PM25" "NO3" "SO4" "NH4" "BC" "OM" "DUST" "SS")
+tracers=("PM25")
 
 
 # Job script file

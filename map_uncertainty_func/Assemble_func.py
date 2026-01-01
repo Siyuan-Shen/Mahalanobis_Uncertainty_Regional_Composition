@@ -27,7 +27,40 @@ def Get_absolute_uncertainty_map(species,version,special_name,YYYY,MM,obs_versio
             padded_map[5:5995,5:12995] += monthly_map
         padded_map = padded_map / 12.0
     absolute_uncertainty_map = padded_map * rRMSE_uncertainty_map 
-    save_absoulute_uncertainty_map(absolute_uncertainty_map=absolute_uncertainty_map,species=species,version=version,special_name=special_name,YYYY=YYYY,MM=MONTH[MM],
+    save_absoulute_uncertainty_map(absolute_uncertainty_map=absolute_uncertainty_map,species=species,version=map_estimation_version,special_name=map_estimation_special_name,YYYY=YYYY,MM=MONTH[MM],
+                                   obs_version=obs_version,nearby_sites_number=nearby_sites_number)
+    return
+
+def Get_longterm_average_absolute_uncertainty_map(species,version,special_name,YYYY_list:np.int32,MM:np.int32,obs_version,nearby_sites_number,
+                                 map_estimation_special_name,map_estimation_version):
+    '''
+    Get longterm average absolute uncertainty map for given species and years/months.
+    '''
+    MONTH = ['01','02','03','04','05','06','07','08','09','10','11','12','AllMonths']
+    if MM != 12:
+        print(f"Calculating longterm average absolute uncertainty map for species: {species}, version: {version}, month: {MONTH[MM]}, obs_version: {obs_version}, nearby_sites_number: {nearby_sites_number}")
+    else:
+        print(f"Calculating longterm average absolute uncertainty map for species: {species}, version: {version}, all months, obs_version: {obs_version}, nearby_sites_number: {nearby_sites_number}")
+    longterm_average_absolute_uncertainty_map = None
+    count = 0
+    for YYYY in YYYY_list:
+        if MM != 12:
+            temp_absolute_uncertainty_map = load_absolute_uncertainty_map(species=species,version=version,special_name=special_name,YYYY=YYYY,MM=MONTH[MM],
+                                                                   obs_version=obs_version,nearby_sites_number=nearby_sites_number)
+        else:
+            temp_absolute_uncertainty_map = np.zeros((6000,13000),dtype=np.float64)
+            for m in range(12):
+                monthly_absolute_uncertainty_map = load_absolute_uncertainty_map(species=species,version=map_estimation_version,special_name=map_estimation_special_name,YYYY=YYYY,MM=MONTH[m],
+                                                                       obs_version=obs_version,nearby_sites_number=nearby_sites_number)
+                temp_absolute_uncertainty_map += monthly_absolute_uncertainty_map
+            temp_absolute_uncertainty_map = temp_absolute_uncertainty_map / 12.0
+        if longterm_average_absolute_uncertainty_map is None:
+            longterm_average_absolute_uncertainty_map = np.zeros_like(temp_absolute_uncertainty_map)
+        longterm_average_absolute_uncertainty_map += temp_absolute_uncertainty_map
+        count += 1
+    longterm_average_absolute_uncertainty_map = longterm_average_absolute_uncertainty_map / count
+    save_absoulute_uncertainty_map(absolute_uncertainty_map=longterm_average_absolute_uncertainty_map,
+                                   species=species,version=map_estimation_version,special_name=map_estimation_special_name,YYYY='Longterm_{}-{}'.format(YYYY_list[0], YYYY_list[-1]),MM=MONTH[MM],
                                    obs_version=obs_version,nearby_sites_number=nearby_sites_number)
     return
 
@@ -66,9 +99,12 @@ def Convert_mahalanobis_distance_map_to_uncertainty(species,version,special_name
                 LOWESS_values = AUTUMN_LOWESS_values
             elif MM == 12:
                 LOWESS_values = ALL_LOWESS_values
-            for iradius in range(len(Mahalanobis_distance_bin_centers)-1):
-                d_left  = Mahalanobis_distance_bin_centers[iradius]
-                d_right = Mahalanobis_distance_bin_centers[iradius+1]
+            valid_LOWESS_index = np.where(~np.isnan(LOWESS_values))[0]
+            LOWESS_values = LOWESS_values[valid_LOWESS_index]
+            temp_Mahalanobis_distance_bin_centers = [Mahalanobis_distance_bin_centers[i] for i in valid_LOWESS_index]
+            for iradius in range(len(temp_Mahalanobis_distance_bin_centers)-1):
+                d_left  = temp_Mahalanobis_distance_bin_centers[iradius]
+                d_right = temp_Mahalanobis_distance_bin_centers[iradius+1]
                 rRMSE_left  = LOWESS_values[iradius]
                 rRMSE_right = LOWESS_values[iradius+1]
                 pixels_index = np.where((mahalanobis_distance_map >= d_left) & (mahalanobis_distance_map < d_right))
@@ -76,26 +112,26 @@ def Convert_mahalanobis_distance_map_to_uncertainty(species,version,special_name
                 slope = (rRMSE_right - rRMSE_left) / (d_right - d_left)
                 map_uncertainty[pixels_index] = (mahalanobis_distance_map[pixels_index]-d_left)*slope + rRMSE_left
 
-            d_left  = Mahalanobis_distance_bin_centers[0]
-            d_right = Mahalanobis_distance_bin_centers[-1]
+            d_left  = temp_Mahalanobis_distance_bin_centers[0]
+            d_right = temp_Mahalanobis_distance_bin_centers[-1]
             rRMSE_left  = LOWESS_values[0]
             rRMSE_right = LOWESS_values[-1]
-            outrange_pixels_index = np.where(mahalanobis_distance_map >= Mahalanobis_distance_bin_centers[-1])
+            outrange_pixels_index = np.where(mahalanobis_distance_map >= temp_Mahalanobis_distance_bin_centers[-1])
             
             mask_low = np.where(mahalanobis_distance_map < d_left)
-
-            if LOWESS_values[1] >= LOWESS_values[0]:
-                    slope = abs(LOWESS_values[1] - LOWESS_values[0]) / (Mahalanobis_distance_bin_centers[1] - Mahalanobis_distance_bin_centers[0])
+            
+            if LOWESS_values[0] <= LOWESS_values[1]:
+                slope = abs(LOWESS_values[1]-LOWESS_values[0])/(temp_Mahalanobis_distance_bin_centers[1]-temp_Mahalanobis_distance_bin_centers[0])
             else:
-                slope = 0.1
-            map_uncertainty[mask_low] = slope * (mahalanobis_distance_map[mask_low] - Mahalanobis_distance_bin_centers[0]) + LOWESS_values[0]
+                slope = 0.05
+            map_uncertainty[mask_low] = slope*(mahalanobis_distance_map[mask_low]-temp_Mahalanobis_distance_bin_centers[0])+LOWESS_values[0]
 
             if LOWESS_values[-1] >= LOWESS_values[-2]:
-                slope = abs(LOWESS_values[-1]-LOWESS_values[-2])/(Mahalanobis_distance_bin_centers[-1]-Mahalanobis_distance_bin_centers[-2])
-                map_uncertainty[outrange_pixels_index] = slope*(mahalanobis_distance_map[outrange_pixels_index]-Mahalanobis_distance_bin_centers[-1])+LOWESS_values[-1]
+                slope = abs(LOWESS_values[-1]-LOWESS_values[-2])/(temp_Mahalanobis_distance_bin_centers[-1]-temp_Mahalanobis_distance_bin_centers[-2])
+                map_uncertainty[outrange_pixels_index] = slope*(mahalanobis_distance_map[outrange_pixels_index]-temp_Mahalanobis_distance_bin_centers[-1])+LOWESS_values[-1]
             else:
                 #slope,intercept = m, b = np.polyfit(Mahalanobis_distance_bin_centers,LOWESS_values,1)#abs(BLCO_rRMSE_LOWESS_values[-1]-BLCO_rRMSE_LOWESS_values[0])/(distances_bins_array[-1]-distances_bins_array[0])
-                map_uncertainty[outrange_pixels_index] = 0.1*(mahalanobis_distance_map[outrange_pixels_index]-Mahalanobis_distance_bin_centers[-1])+LOWESS_values[-1]
+                map_uncertainty[outrange_pixels_index] = 0.1*(mahalanobis_distance_map[outrange_pixels_index]-temp_Mahalanobis_distance_bin_centers[-1])+LOWESS_values[-1]
                 #map_uncertainty[outrange_pixels_index] = rRMSE_right #(map_distances[outrange_pixels_index]-d_left)/(d_right-d_left) * (rRMSE_right - rRMSE_left) +rRMSE_left
             save_rRMSE_map(rRMSE_uncertainty_map=map_uncertainty,species=species,version=version,YYYY=YYYY,MM=MONTH[MM],
                             obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
@@ -104,10 +140,14 @@ def Convert_mahalanobis_distance_map_to_uncertainty(species,version,special_name
 def Get_nearby_sites_indices_map(species,version,nearby_sites_number,YYYY:np.int32,MM:np.int32):
     obs_data, obs_lat, obs_lon = load_RawObservation(species)
     MONTH = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    original_nearby_sites_number = nearby_sites_number
     if MM != 12:
         temp_obs_data = obs_data[:,(YYYY-1998)*12 + MM]
         nonan_index = np.where(~np.isnan(temp_obs_data))
         obs_index = np.arange(obs_lat.shape[0])
+        if obs_lat[nonan_index].shape[0] < nearby_sites_number:
+            nearby_sites_number = obs_lat[nonan_index].shape[0]
+            print('The nearby sites number is set to {} due to the limited valid observations.'.format(nearby_sites_number))
         NA_GeoLAT_MAP, NA_GeoLON_MAP = load_NA_GeoLatLon_Map()
         nearby_sites_training_data_indices = np.zeros((NA_GeoLAT_MAP.shape[0],NA_GeoLAT_MAP.shape[1],nearby_sites_number), dtype=int)
         landtype = get_landtype(YYYY=2015,extent=[10.005,69.995,-169.995,-40.005])
@@ -126,7 +166,7 @@ def Get_nearby_sites_indices_map(species,version,nearby_sites_number,YYYY:np.int
                 nearby_sites_training_data_indices[ix,land_index[0],:] = original_idx
                 
         save_pixel_nearby_sites_index_map(nearby_sites_training_data_indices=nearby_sites_training_data_indices,
-                                        species=species,version=version,YYYY=YYYY,MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+                                        species=species,version=version,YYYY=YYYY,MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=original_nearby_sites_number)
     
     return
 
@@ -151,9 +191,9 @@ def Get_local_reference_for_channels(channel_lists,species,version,NA_CNN_versio
             temp_training_data = RawObs_training_data[channel][((YYYY-1998)*12 + MM)*sites_number : ((YYYY-1998)*12 + MM +1)*sites_number]
             temp_training_data_reference_map = np.zeros((NA_GeoLAT_MAP.shape[0],NA_GeoLAT_MAP.shape[1]), dtype=np.float32)
             local_reference_for_channels_map[channel] = np.zeros((NA_GeoLAT_MAP.shape[0],NA_GeoLAT_MAP.shape[1]), dtype=np.float32)
-            for ik in range(nearby_sites_number):
+            for ik in range(K):
                 temp_training_data_reference_map += temp_training_data[nearby_sites_training_data_indices[:, :, ik]]
-            temp_training_data_reference_map = temp_training_data_reference_map / nearby_sites_number
+            temp_training_data_reference_map = temp_training_data_reference_map / K
             local_reference_for_channels_map[channel] = temp_training_data_reference_map
         save_local_reference_map(local_reference_for_channels_map=local_reference_for_channels_map,
                                 species=species,version=version,YYYY=YYYY,MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
@@ -161,8 +201,10 @@ def Get_local_reference_for_channels(channel_lists,species,version,NA_CNN_versio
 
  
 def Calculate_Mahalanobis_distance(channel_lists,species,version,NA_CNN_version,NorthAmerica_PM25_special_name,
-                                   AVD_version,Obs_version,start_year,end_year,Width,Height,nearby_sites_number,YYYY:np.int32,MM:np.int32):
+                                   AVD_version,Obs_version,start_year,end_year,Width,Height,nearby_sites_number,YYYY:np.int32,MM:np.int32,
+                                   longterm_average:bool=False):
     MONTH = ['01','02','03','04','05','06','07','08','09','10','11','12','Annual']
+
     if MM != 12:
         RawObs_training_data = load_RawObs_training_data(channel_lists=channel_lists,
                                                         species=species,version=NA_CNN_version,special_name=NorthAmerica_PM25_special_name,
@@ -203,10 +245,48 @@ def Calculate_Mahalanobis_distance(channel_lists,species,version,NA_CNN_version,
         Mahalanobis_distance_data = np.zeros((local_reference_for_channels_map[channel_lists[0]].shape[0],local_reference_for_channels_map[channel_lists[0]].shape[1]), dtype=np.float32)
         for imonth in range(12):
             temp_Mahalanobis_distance_map = load_mahalanobis_distance_map(species=species,version=version,YYYY=YYYY,MM=MONTH[imonth],
-                                                             obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+                                                            obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
             Mahalanobis_distance_data += temp_Mahalanobis_distance_map
         Mahalanobis_distance_data = Mahalanobis_distance_data / 12.0
         save_mahalanobis_distance_map(mahalanobis_distance_map=Mahalanobis_distance_data,
                                     species=species,version=version,YYYY=YYYY,MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
-            
+
+        
+                
     return Mahalanobis_distance_data
+
+def get_longterm_average_mahalanobis_distance_map(species,version,Obs_version,nearby_sites_number,YYYY_list:np.int32,MM:np.int32):
+    '''
+    Get longterm average Mahalanobis distance map for given species and years/months.
+    '''
+    MONTH = ['01','02','03','04','05','06','07','08','09','10','11','12','AllMonths']
+    if MM != 12:
+        print(f"Calculating longterm average Mahalanobis distance map for species: {species}, version: {version}, month: {MONTH[MM]}, obs_version: {Obs_version}, nearby_sites_number: {nearby_sites_number}")
+        longterm_average_mahalanobis_distance_map = None
+        count = 0
+        for YYYY in YYYY_list:
+            temp_mahalanobis_distance_map = load_mahalanobis_distance_map(species=species,version=version,YYYY=YYYY,MM=MONTH[MM],
+                                                            obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+            if longterm_average_mahalanobis_distance_map is None:
+                longterm_average_mahalanobis_distance_map = np.zeros_like(temp_mahalanobis_distance_map)
+            longterm_average_mahalanobis_distance_map += temp_mahalanobis_distance_map
+            count += 1
+        longterm_average_mahalanobis_distance_map = longterm_average_mahalanobis_distance_map / count
+        save_mahalanobis_distance_map(mahalanobis_distance_map=longterm_average_mahalanobis_distance_map,
+                                    species=species,version=version,YYYY='Longterm_{}-{}'.format(YYYY_list[0], YYYY_list[-1]),MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+    elif MM == 12:
+        print(f"Calculating longterm average Mahalanobis distance map for species: {species}, version: {version}, month: All Months, obs_version: {Obs_version}, nearby_sites_number: {nearby_sites_number}")
+        longterm_average_mahalanobis_distance_map = None
+        count = 0
+        for YYYY in YYYY_list:
+            for imonth in range(12):
+                temp_mahalanobis_distance_map = load_mahalanobis_distance_map(species=species,version=version,YYYY=YYYY,MM=MONTH[imonth],
+                                                            obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+                if longterm_average_mahalanobis_distance_map is None:
+                    longterm_average_mahalanobis_distance_map = np.zeros_like(temp_mahalanobis_distance_map)
+                longterm_average_mahalanobis_distance_map += temp_mahalanobis_distance_map
+                count += 1
+        longterm_average_mahalanobis_distance_map = longterm_average_mahalanobis_distance_map / count
+        save_mahalanobis_distance_map(mahalanobis_distance_map=longterm_average_mahalanobis_distance_map,
+                                    species=species,version=version,YYYY='Longterm_{}-{}'.format(YYYY_list[0], YYYY_list[-1]),MM=MONTH[MM],obs_version=Obs_version,nearby_sites_number=nearby_sites_number)
+    return

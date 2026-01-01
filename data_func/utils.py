@@ -3,8 +3,9 @@ import math
 
 AVD_version = 'gPM25-20240604'
 Obs_version = '20241015'
-compute1= False
-local_laptop = True
+compute1= True
+local_laptop = False
+
 
 GCC_version                         = 'MERRASPEC-GCV11.GLandNested-20240607-RH35-199801-202312-wSA'
 

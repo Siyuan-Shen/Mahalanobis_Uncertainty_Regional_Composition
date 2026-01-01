@@ -1,6 +1,6 @@
-from map_uncertainty_func.Assemble_func import Get_absolute_uncertainty_map,Convert_mahalanobis_distance_map_to_uncertainty,Calculate_Mahalanobis_distance,Get_nearby_sites_indices_map, Get_local_reference_for_channels
+from map_uncertainty_func.Assemble_func import get_longterm_average_mahalanobis_distance_map,Get_longterm_average_absolute_uncertainty_map,Get_absolute_uncertainty_map,Convert_mahalanobis_distance_map_to_uncertainty,Calculate_Mahalanobis_distance,Get_nearby_sites_indices_map, Get_local_reference_for_channels
 from data_func.utils import Get_typeName, AVD_version, Obs_version
-from visualization_pkg.Assemble_func import plot_mahalanobis_distance_map, plot_rRMSE_uncertainty_map,plot_absolute_uncertainty_map,plot_map_estimation_data
+from visualization_pkg.Assemble_func import plot_longterm_average_absolute_uncertainty_map,plot_longterm_average_mahalanobis_distance_map,plot_longterm_average_map_estimation_data,plot_mahalanobis_distance_map, plot_rRMSE_uncertainty_map,plot_absolute_uncertainty_map,plot_map_estimation_data
 import argparse
 import numpy as np
 
@@ -23,12 +23,26 @@ Plot_mahalanobis_distance_map_switch = False # After getting the Mahalanobis dis
 Get_uncertainty_rRMSE_map_Switch = False # Before getting the map, run the file mahalanobis_distance_uncertainty_test.ipynb to get the relationship between Mahalanobis distance and rRMSE.
 Plot_rRMSE_uncertainty_map_Switch = False # After getting the rRMSE uncertainty map, set it to True to plot the figures.
 
-Get_absolute_uncertainty_map_Switch = False # Multiple the rRMSE uncertainty map with the estimation map to get the absolute uncertainty map.
+Get_absolute_uncertainty_map_Switch = True # Multiple the rRMSE uncertainty map with the estimation map to get the absolute uncertainty map.
 Plot_absolute_uncertainty_map_Switch = True # After getting the absolute uncertainty map, set it to True to plot the figures.
 
 Plot_Map_estimation_Switch = True # Plot the map estimation data.
 
-plot_months = [0,6,12]  # The months to plot the rRMSE uncertainty map.
+plot_months = [0,1,2,3,4,5,6,7,8,9,10,11,12]  # The months to plot the rRMSE uncertainty map.
+
+
+#################################################################################################################
+#### Longterm average maps Switches and parameters
+#################################################################################################################
+# must get all months prior running longterm average maps
+
+get_longterm_average_mahalanobis_distance_map_Switch = False # Get longterm average Mahalanobis distance map
+get_longterm_average_absolute_uncertainty_map_Switch = False # Get longterm average absolute uncertainty map
+
+plot_longterm_average_mahalanobis_distance_map_Switch = False # Plot longterm average Mahalanobis distance map
+plot_longterm_average_absolute_uncertainty_map_Switch = False # Plot longterm average absolute uncertainty map
+plot_longterm_average_map_estimation_data_Switch = False # Plot longterm average map estimation data
+longterm_months = [0,6,12]  # The months to plot the longterm average maps.
 
 if 'PM25' in SPECIES_list:
     species = 'PM25'
@@ -57,113 +71,15 @@ if 'PM25' in SPECIES_list:
                     'Lat', 'Lon', 'elevation',
                     'Population'
                     ]
+    map_estimation_version = 'v1.8.2'
+    map_estimation_special_name = '_BenchMark_sitethreshold5_reflect_padding_avgpoolingNoPadding_layer0_kernel3'
     local_nearby_sites_number = 30
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
+    vmin_list = [0, 0, 0, 0, 0]
+    vmax_list = [5, 5, 10, 5, 5]
 
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-                
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [5,5,5,5,5]
     
-    
-    if Plot_rRMSE_uncertainty_map_Switch:
-        vmin_list = [0.25 , 0.25, 0.15, 0.25]
-        vmax_list = [0.65 , 1.2 , 0.90,  1.0]
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=special_name,
-                                            map_estimation_version=version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [5, 5, 10, 5, 5]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_version=version,YYYY=YYYY,MM=MM,map_estimation_special_name=special_name)
-                
-                
-local_nearby_sites_number = 20
 if 'NO3' in SPECIES_list:
     species = 'NO3'
     version = 'v1.8.1'
@@ -174,8 +90,8 @@ if 'NO3' in SPECIES_list:
     special_name = '_BenchMark_AllYEAR_TwoModels_withThreeStarsVariables-1-3-4'
     width = 11
     height = 11
-    training_data_version = 'NA_PM25-v1.8.0'
-    training_data_special_name = '_BenchMark'
+    training_data_version = 'NA_PM25-v1.8.2'
+    training_data_special_name = '_BenchMark_sitethreshold5_reflect_padding_avgpoolingNoPadding_layer0_kernel3'
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
@@ -189,108 +105,15 @@ if 'NO3' in SPECIES_list:
                     'Urban_Builtup_Lands','Croplands',
                     'Month_of_Year',
                     'Lat', 'Lon','elevation',
-                    'Population' ] 
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
-
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.5, 0.6, 0.5, 0.25]
-                vmax_list = [0.8, 1.5, 1.2, 0.4]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=special_name,
-                                            map_estimation_version=version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [2, 2, 2, 2, 2]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_version=version,YYYY=YYYY,MM=MM,map_estimation_special_name=special_name)
-                
+                    'Population' ]
+    map_estimation_version = 'v1.8.3'
+    map_estimation_special_name = '_BenchMark_avgpooling_padding_GeoMSE_Gamma5d0_P2_0d3' 
+    local_nearby_sites_number = 20
+    vmin_list = [0.5, 0.6, 0.5, 0.25]
+    vmax_list = [0.8, 1.5, 1.2, 0.4]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
+    
 if 'SO4' in SPECIES_list:
     species = 'SO4'
     version = 'v1.8.1'
@@ -306,6 +129,7 @@ if 'SO4' in SPECIES_list:
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
+    local_nearby_sites_number = 20
     channel_lists = ['AOD', 'EtaAOD_Bias', 'EtaCoastal', 'EtaMixing', 'EtaSGAOD_Bias',  'ETA','EtaSGTOPO_Bias','GeoPM25',
                     'GeoSO4','GeoNH4','GeoNIT','GeoBC','GeoOM','GeoDUST','GeoSS',
                     'NA_CNN_PM25',
@@ -318,106 +142,15 @@ if 'SO4' in SPECIES_list:
                     'Lat', 'Lon','elevation',
                    #'Population'
                     ] 
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
+    map_estimation_version = 'v1.8.1'
+    map_estimation_special_name = '_BenchMark_AllYEAR_TwoModels'
+    vmin_list = [0.3, 0.2, 0.3, 0.2]
+    vmax_list = [0.8, 0.6, 0.8, 0.6]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
+    
+                
 
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.3, 0.2, 0.3, 0.2]
-                vmax_list = [0.8, 0.6, 0.8, 0.6]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=special_name,
-                                            map_estimation_version=version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [2, 2, 2, 2, 2]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_version=version,YYYY=YYYY,MM=MM,map_estimation_special_name=special_name)
 if 'NH4' in SPECIES_list:
     species = 'NH4'
     version = 'v1.8.1'
@@ -428,8 +161,8 @@ if 'NH4' in SPECIES_list:
     special_name = '_BenchMark_AllYEAR_TwoModels_withThreeStarsVariables'
     width = 11
     height = 11
-    training_data_version = 'NA_PM25-v1.8.0'
-    training_data_special_name = '_BenchMark'
+    training_data_version = 'NA_PM25-v1.8.2'
+    training_data_special_name = '_BenchMark_sitethreshold5_reflect_padding_avgpoolingNoPadding_layer0_kernel3'
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
@@ -444,106 +177,14 @@ if 'NH4' in SPECIES_list:
                     'Lat', 'Lon','elevation',
                     'Population'
                     ] 
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.3, 0.2, 0.3, 0.3]
-                vmax_list = [0.8, 1.2, 0.8, 0.8]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=special_name,
-                                            map_estimation_version=version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [2, 2, 2, 2, 2]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_version=version,YYYY=YYYY,MM=MM,map_estimation_special_name=special_name)
-                
+    map_estimation_version = 'v1.8.3'
+    map_estimation_special_name = '_BenchMark_avgpoolingPadded_layer0_kernel3_replicate_padding_annualModel_Gamma5d0_P2-0d5'
+    local_nearby_sites_number = 20
+    vmin_list = [0.3, 0.2, 0.3, 0.3]
+    vmax_list = [0.8, 1.2, 0.8, 0.8]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
+    
 if 'BC' in SPECIES_list:
     species = 'BC'
     version = 'v1.8.1'
@@ -554,8 +195,8 @@ if 'BC' in SPECIES_list:
     special_name = '_BenchMark_AllYEAR_TwoModels'
     width = 11
     height = 11
-    training_data_version = 'NA_PM25-v1.8.0'
-    training_data_special_name = '_BenchMark'
+    training_data_version = 'NA_PM25-v1.8.2'
+    training_data_special_name = '_BenchMark_AllYEAR_twoModels-Threshold5_MSE'
     buffer_radius_list = [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200]
     BLCO_kfold = 10
     BLCO_seeds_number = 10
@@ -571,106 +212,14 @@ if 'BC' in SPECIES_list:
                      'Month_of_Year',
                     'Lat', 'Lon','elevation'
                     ] 
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
-
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.5, 0.4, 0.5, 0.4]
-                vmax_list = [0.8, 0.9, 1.0, 0.8]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=special_name,
-                                            map_estimation_version=version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [1, 1, 1, 1, 1]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_version=version,YYYY=YYYY,MM=MM,map_estimation_special_name=special_name)
+    map_estimation_version = 'v1.8.3'
+    map_estimation_special_name = '_BenchMark_AllYEAR_twoModels-Threshold5_MSE'
+    local_nearby_sites_number = 20
+    vmin_list = [0.5, 0.4, 0.5, 0.4]
+    vmax_list = [0.8, 0.9, 1.0, 0.8]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
+    
 if 'OM' in SPECIES_list:
     species = 'OM'
     version = 'v1.8.1'
@@ -697,111 +246,14 @@ if 'OM' in SPECIES_list:
                     'Month_of_Year',
                     'Lat', 'Lon','elevation',
                     ] 
-    map_estimation_version = 'v1.8.1'
-    map_estimation_special_name = '_BenchMark_withThreeStarVariables'
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
-
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                                species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.4, 0.3, 0.3, 0.4]
-                vmax_list = [0.8, 0.8, 1.2, 0.6]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=map_estimation_special_name,
-                                            map_estimation_version=map_estimation_version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [2, 2, 4, 2, 4]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,YYYY=YYYY,MM=MM,
-                                         map_estimation_version=map_estimation_version,
-                                         map_estimation_special_name=map_estimation_special_name)
+    map_estimation_version = 'v1.8.3'
+    map_estimation_special_name = '_BenchMark_zeros_padding_maxpooling_layer0_kernel7—MSE_exclude_eta_bias'
+    local_nearby_sites_number = 20
+    vmin_list = [0.4, 0.3, 0.3, 0.4]
+    vmax_list = [0.8, 0.8, 1.2, 0.6]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [4,4,4,4,4]
+    
 if 'DUST' in SPECIES_list:
     species = 'DUST'
     version = 'v1.8.1'
@@ -829,111 +281,15 @@ if 'DUST' in SPECIES_list:
                 'Month_of_Year',
                 'Lat', 'Lon','elevation',
                 #'Population'
-                ] 
+                ]
     map_estimation_version = 'v1.8.1'
-    map_estimation_special_name = '_BenchMark_AllYEAR_TwoModels_Epoch51_withThreeStarVariables'
-
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
-
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-        Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.8, 0.5, 0.6, 0.5]
-                vmax_list = [1.2, 0.9, 1.0, 0.9]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                            obs_version=Obs_version,
-                                            nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=map_estimation_special_name,
-                                            map_estimation_version=map_estimation_version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [1, 1, 2, 1, 1]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_special_name=map_estimation_special_name,map_estimation_version=map_estimation_version,YYYY=YYYY,MM=MM)
+    map_estimation_special_name = '_BenchMark_AllYEAR_TwoModels_Epoch51_withThreeStarVariables-Threshold5_GeoMSE_Gamma5_P0d5'
+    local_nearby_sites_number = 20
+    vmin_list = [0.8, 0.5, 0.6, 0.5]
+    vmax_list = [1.2, 0.9, 1.0, 0.9]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
+    
 if 'SS' in SPECIES_list:
     species = 'SS'
     version = 'v1.8.1'
@@ -961,103 +317,181 @@ if 'SS' in SPECIES_list:
                     ] 
     map_estimation_version = 'v1.8.1'
     map_estimation_special_name = '_BenchMark_AllYear_twoModels_exclude_SS_Emi'
-    if Get_the_nearby_sites_indices_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
-                                             YYYY=YYYY,MM=MM)
-    if Get_local_reference_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_local_reference_for_channels(channel_lists=channel_lists,
-                                                species=species,version=version,NA_CNN_version=training_data_version,
-                                                NorthAmerica_PM25_special_name=training_data_special_name,
-                                                AVD_version=AVD_version,Obs_version=Obs_version,
-                                                start_year=startyear,end_year=endyear,
-                                                Width=width,Height=height,
-                                                nearby_sites_number=local_nearby_sites_number,
-                                                YYYY=YYYY,MM=MM)
+    local_nearby_sites_number = 20
+    vmin_list = [0.8, 1.0, 1.2, 0.6]
+    vmax_list = [1.6, 2.0, 2.0, 1.8]
+    absolute_uncertainty_vmin_list = [0,0,0,0,0]
+    absolute_uncertainty_vmax_list = [1,1,1,1,1]
 
-    if Get_mahalanobis_distance_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Calculate_Mahalanobis_distance(channel_lists=channel_lists,
-                                              species=species,version=version,NA_CNN_version=training_data_version,
-                                              NorthAmerica_PM25_special_name=training_data_special_name,
-                                              AVD_version=AVD_version,Obs_version=Obs_version,
-                                              start_year=startyear,end_year=endyear,
-                                              Width=width,Height=height,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY=YYYY,MM=MM)
-    if Plot_mahalanobis_distance_map_switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_mahalanobis_distance_map(species=species,version=version,
-                                              YYYY=YYYY,MM=MM,
-                                              obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number)
-    if Get_uncertainty_rRMSE_map_Switch:
-       Convert_mahalanobis_distance_map_to_uncertainty(
-                                              species=species,version=version,special_name=special_name,
-                                              Obs_version=Obs_version,
-                                              nearby_sites_number=local_nearby_sites_number,
-                                              YYYY_list=desire_year_list,MM_list=plot_months)
-    if Plot_rRMSE_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0.8, 1.0, 1.2, 0.6]
-                vmax_list = [1.6, 2.0, 2.0, 1.8]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                else:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                plot_rRMSE_uncertainty_map(species=species,version=version,
-                                           YYYY=YYYY,MM=MM,
-                                           obs_version=Obs_version,
-                                           nearby_sites_number=local_nearby_sites_number,
-                                           vmin=vmin,vmax=vmax)
-    if Get_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
+#############################################################################################################
+### Get local reference map
+#############################################################################################################
+if Get_the_nearby_sites_indices_map_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            Get_nearby_sites_indices_map(species=species,version=version,nearby_sites_number=local_nearby_sites_number,
+                                            YYYY=YYYY,MM=MM)
+if Get_local_reference_map_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            Get_local_reference_for_channels(channel_lists=channel_lists,
+                                            species=species,version=version,NA_CNN_version=training_data_version,
+                                            NorthAmerica_PM25_special_name=training_data_special_name,
+                                            AVD_version=AVD_version,Obs_version=Obs_version,
+                                            start_year=startyear,end_year=endyear,
+                                            Width=width,Height=height,
+                                            nearby_sites_number=local_nearby_sites_number,
+                                            YYYY=YYYY,MM=MM)
+#############################################################################################################
+### Get and plot Mahalanobis distance map
+#############################################################################################################
+if Get_mahalanobis_distance_map_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            Calculate_Mahalanobis_distance(channel_lists=channel_lists,
+                                            species=species,version=version,NA_CNN_version=training_data_version,
+                                            NorthAmerica_PM25_special_name=training_data_special_name,
+                                            AVD_version=AVD_version,Obs_version=Obs_version,
+                                            start_year=startyear,end_year=endyear,
+                                            Width=width,Height=height,
+                                            nearby_sites_number=local_nearby_sites_number,
+                                            YYYY=YYYY,MM=MM)
+if Plot_mahalanobis_distance_map_switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            plot_mahalanobis_distance_map(species=species,version=version,
+                                            YYYY=YYYY,MM=MM,
+                                            obs_version=Obs_version,
+                                            nearby_sites_number=local_nearby_sites_number)
+            
+#############################################################################################################
+### Get and plot rRMSE uncertainty map
+#############################################################################################################
+            
+if Get_uncertainty_rRMSE_map_Switch:
+    Convert_mahalanobis_distance_map_to_uncertainty(
+                                            species=species,version=version,special_name=special_name,
+                                            Obs_version=Obs_version,
+                                            nearby_sites_number=local_nearby_sites_number,
+                                            YYYY_list=desire_year_list,MM_list=plot_months)
+
+
+if Plot_rRMSE_uncertainty_map_Switch:
+    vmin_list = [0.25 , 0.25, 0.15, 0.25]
+    vmax_list = [0.65 , 1.2 , 0.90,  1.0]
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            if MM in [0,1,11]:
+                vmin = vmin_list[0]
+                vmax = vmax_list[0]
+            elif MM in [2,3,4]:
+                vmin = vmin_list[1]
+                vmax = vmax_list[1]
+            elif MM in [5,6,7]:
+                vmin = vmin_list[2]
+                vmax = vmax_list[2]
+            else:
+                vmin = vmin_list[3]
+                vmax = vmax_list[3]
+            plot_rRMSE_uncertainty_map(species=species,version=version,
+                                        YYYY=YYYY,MM=MM,
+                                        obs_version=Obs_version,
+                                        nearby_sites_number=local_nearby_sites_number,
+                                        vmin=vmin,vmax=vmax)
+
+#############################################################################################################
+### Get and plot absolute uncertainty map
+#############################################################################################################
+if Get_absolute_uncertainty_map_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            Get_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
+                                        obs_version=Obs_version,
+                                        nearby_sites_number=local_nearby_sites_number,
+                                        YYYY=YYYY,MM=MM,map_estimation_special_name=map_estimation_special_name,
+                                        map_estimation_version=map_estimation_version)
+if Plot_absolute_uncertainty_map_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            
+            if MM in [0,1,11]:
+                vmin = absolute_uncertainty_vmin_list[0]
+                vmax = absolute_uncertainty_vmax_list[0]
+            elif MM in [2,3,4]:
+                vmin = absolute_uncertainty_vmin_list[1]
+                vmax = absolute_uncertainty_vmax_list[1]
+            elif MM in [5,6,7]:
+                vmin = absolute_uncertainty_vmin_list[2]
+                vmax = absolute_uncertainty_vmax_list[2]
+            elif MM in [8,9,10]:
+                vmin = absolute_uncertainty_vmin_list[3]
+                vmax = absolute_uncertainty_vmax_list[3]
+            else:
+                vmin = absolute_uncertainty_vmin_list[4]
+                vmax = absolute_uncertainty_vmax_list[4]
+            plot_absolute_uncertainty_map(species=species,map_estimation_version=map_estimation_version,map_estimation_special_name=map_estimation_special_name,
+                                            YYYY=YYYY,MM=MM,
                                             obs_version=Obs_version,
                                             nearby_sites_number=local_nearby_sites_number,
-                                            YYYY=YYYY,MM=MM,map_estimation_special_name=map_estimation_special_name,
-                                            map_estimation_version=map_estimation_version)
-    if Plot_absolute_uncertainty_map_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                vmin_list = [0, 0, 0, 0, 0]
-                vmax_list = [1, 1, 1, 1, 1]
-                if MM in [0,1,11]:
-                    vmin = vmin_list[0]
-                    vmax = vmax_list[0]
-                elif MM in [2,3,4]:
-                    vmin = vmin_list[1]
-                    vmax = vmax_list[1]
-                elif MM in [5,6,7]:
-                    vmin = vmin_list[2]
-                    vmax = vmax_list[2]
-                elif MM in [8,9,10]:
-                    vmin = vmin_list[3]
-                    vmax = vmax_list[3]
-                else:
-                    vmin = vmin_list[4]
-                    vmax = vmax_list[4]
-                plot_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
-                                             YYYY=YYYY,MM=MM,
-                                             obs_version=Obs_version,
-                                             nearby_sites_number=local_nearby_sites_number,
-                                             vmin=vmin,vmax=vmax)
-    if Plot_Map_estimation_Switch:
-        for YYYY in desire_year_list:
-            for MM in plot_months:
-                plot_map_estimation_data(species=species,map_estimation_special_name=map_estimation_special_name,map_estimation_version=map_estimation_version,YYYY=YYYY,MM=MM)
+                                            vmin=vmin,vmax=vmax)
+############################################################################################################
+### Plot map estimation data
+############################################################################################################
+if Plot_Map_estimation_Switch:
+    for YYYY in desire_year_list:
+        for MM in plot_months:
+            plot_map_estimation_data(species=species,map_estimation_version=map_estimation_version,YYYY=YYYY,MM=MM,map_estimation_special_name=map_estimation_special_name)
+        
+
+##################################################################################################################
+### Longterm average maps
+##################################################################################################################
+if get_longterm_average_mahalanobis_distance_map_Switch:
+    for MM in longterm_months:
+        get_longterm_average_mahalanobis_distance_map(species=species,version=version,
+                                                Obs_version=Obs_version,
+                                                nearby_sites_number=local_nearby_sites_number,
+                                                YYYY_list=desire_year_list,MM=MM)
+if get_longterm_average_absolute_uncertainty_map_Switch:
+    for MM in longterm_months:
+        Get_longterm_average_absolute_uncertainty_map(species=species,version=version,special_name=special_name,
+                                                obs_version=Obs_version,
+                                                nearby_sites_number=local_nearby_sites_number,
+                                                YYYY_list=desire_year_list,MM=MM,
+                                                map_estimation_special_name=map_estimation_special_name,
+                                                map_estimation_version=map_estimation_version)
+if plot_longterm_average_mahalanobis_distance_map_Switch:
+    for MM in longterm_months:
+        plot_longterm_average_mahalanobis_distance_map(species=species,version=version,
+                                                YYYY_list=desire_year_list,MM=MM,
+                                                obs_version=Obs_version,
+                                                nearby_sites_number=local_nearby_sites_number)
+        
+if plot_longterm_average_absolute_uncertainty_map_Switch:
+    for MM in longterm_months:
+        if MM in [0,1,11]:
+            vmin = absolute_uncertainty_vmin_list[0]
+            vmax = absolute_uncertainty_vmax_list[0]
+        elif MM in [2,3,4]:
+            vmin = absolute_uncertainty_vmin_list[1]
+            vmax = absolute_uncertainty_vmax_list[1]
+        elif MM in [5,6,7]:
+            vmin = absolute_uncertainty_vmin_list[2]
+            vmax = absolute_uncertainty_vmax_list[2]
+        elif MM in [8,9,10]:
+            vmin = absolute_uncertainty_vmin_list[3]
+            vmax = absolute_uncertainty_vmax_list[3]
+        else:
+            vmin = absolute_uncertainty_vmin_list[4]
+            vmax = absolute_uncertainty_vmax_list[4]
+        plot_longterm_average_absolute_uncertainty_map(species=species,map_estimation_version=map_estimation_version,map_estimation_special_name=map_estimation_special_name,
+                                                YYYY_list=desire_year_list,MM=MM,
+                                                obs_version=Obs_version,
+                                                nearby_sites_number=local_nearby_sites_number,
+                                                vmin=vmin,vmax=vmax
+                                        )
+if plot_longterm_average_map_estimation_data_Switch:
+    for MM in longterm_months:
+        plot_longterm_average_map_estimation_data(species=species,map_estimation_version=map_estimation_version,
+                                                YYYY_list=desire_year_list,MM=MM,
+                                                map_estimation_special_name=map_estimation_special_name)
